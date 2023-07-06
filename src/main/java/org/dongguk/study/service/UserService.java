@@ -13,7 +13,7 @@ public class UserService {
     public UserDto readUserProfile() {
         return UserDto.builder()
                 .id(0L)
-                .name("wonjun")
+                .name("wonjo")
                 .introduction("intro").build();
     }
 }
