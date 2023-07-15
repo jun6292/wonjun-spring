@@ -15,6 +15,14 @@ public class UserController {
 
     @GetMapping("/user")
     public UserDto readUserProfile() {
-        return userService.readUserProfile();
+        return userService.readUserProfile(0L);
+    }
+
+    public UserDto updateUserProfile() {
+        return userService.updateUserProfile(0L, "수정");
+    }
+
+    public UserDto deleteUserProfile() {
+        userService.deleteUserProfile(0L);
     }
 }

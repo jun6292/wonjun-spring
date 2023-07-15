@@ -18,17 +18,17 @@ public class DiaryController {
     }
 
     @PostMapping("/diary")    // 저장
-    public DiaryDto createDiary(DiaryDto diaryDto) {
-        return diaryService.createDiary(diaryDto);
+    public DiaryDto createDiary() {
+        return diaryService.createDiary();
     }
 
-    @PutMapping("/diary/{id}")   // 전체 변경
-    public DiaryDto updateDiary(Long id, DiaryDto diaryDto) {
-        return diaryService.updateDiary(id, diaryDto);
-    }
+//    @PutMapping("/diary/{id}")   // 전체 변경
+//    public DiaryDto updateDiary(Long id, DiaryDto diaryDto) {
+//        return diaryService.updateDiary(id, diaryDto);
+//    }
 
-    @DeleteMapping("/diary/{id}")   // 삭제
-    public void DeleteDiary(Long id) {
-        diaryService.deleteDiary(id);
-    }
+//    @DeleteMapping("/diary/{id}")   // 삭제
+//    public void DeleteDiary(Long id) {
+//        diaryService.deleteDiary(id);
+//    }
 }
