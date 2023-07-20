@@ -13,23 +13,31 @@ import java.sql.Timestamp;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "users")
+@Table(name = "diary")
 @DynamicUpdate
-public class User {
+public class Diary {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "use_id", nullable = false)
-    private Long id;
+    @Column(name = "diary_id", nullable = false)
+    private Long diaryId;
 
     @Column(name = "user_name", nullable = false)
     private String name;
+
+    @Column(name = "title")
+    private String title;
+
+    @Column(name = "content")
+    private String content;
 
     @Column(name = "created_date")
     private Timestamp createdDate;
 
     @Builder
-    public User(String name, Timestamp createdDate) {
+    public Diary(String name, String title, String content, Timestamp createdDate) {
         this.name = name;
+        this.title = title;
+        this.content = content;
         this.createdDate = createdDate;
     }
 }
