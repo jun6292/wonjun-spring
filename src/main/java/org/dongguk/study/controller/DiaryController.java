@@ -12,23 +12,23 @@ import org.springframework.web.bind.annotation.*;
 public class DiaryController {
     private final DiaryService diaryService;
 
-    @GetMapping("/diary/{diaryId}")
-    public DiaryDto getDiaryById(@PathVariable Long diaryId) { // 다이어리 조회
-        return diaryService.getDiaryById(diaryId);
-    }
-
     @PostMapping("/diary")    // 저장
-    public DiaryDto createDiary(DiaryDto diaryDto) {
+    public DiaryDto createDiary(@RequestBody DiaryDto diaryDto) {
         return diaryService.createDiary(diaryDto.getName(), diaryDto.getTitle(), diaryDto.getContent());
     }
 
-    @PutMapping("/diary/update/{diaryId}")   // 전체 변경
-    public DiaryDto updateDiary(@PathVariable Long diaryId, String title, String content) {
+    @GetMapping("/diary/{diaryId}")
+    public DiaryDto readDiary(@PathVariable("diaryId") Long diaryId) { // 다이어리 조회
+        return diaryService.readDiary(diaryId);
+    }
+
+    @PutMapping("/diary/{diaryId}")   // 전체 변경
+    public DiaryDto updateDiary(@PathVariable("diaryId") Long diaryId, String title, String content) {
         return diaryService.updateDiary(diaryId, title, content);
     }
 
-    @DeleteMapping("/diary/delete/{diaryId}")   // 삭제
-    public DiaryDto deleteDiary(@PathVariable Long diaryId) {
+    @DeleteMapping("/diary/{diaryId}")   // 삭제
+    public Boolean deleteDiary(@PathVariable("diaryId") Long diaryId) {
         return diaryService.deleteDiary(diaryId);
     }
 }

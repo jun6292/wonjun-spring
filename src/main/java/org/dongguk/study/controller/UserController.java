@@ -25,8 +25,8 @@ public class UserController {
         return userService.updateUserProfile(1L, "수정");
     }
 
-    @DeleteMapping("/user")
-    public UserDto deleteUserProfile() {
-        return userService.deleteUserProfile(1L);
-    }
+//    @DeleteMapping("/user")
+//    public UserDto deleteUserProfile() {
+//        return userService.deleteUserProfile(1L);
+//    }
 }
