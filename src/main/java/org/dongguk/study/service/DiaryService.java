@@ -16,28 +16,15 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class DiaryService {
     private final DiaryRepository diaryRepository;
-    public DiaryDto getDiaryById(Long diaryId) {     // 다이어리 조회
-        Diary diary = diaryRepository.findById(diaryId).orElseThrow(() -> new RuntimeException("다이어리가 존재하지 않습니다."));
-        DiaryDto diaryDto = DiaryDto.builder()
-                .diaryId(diary.getDiaryId())
-                .name(diary.getName())
-                .title(diary.getTitle())
-                .content(diary.getContent())
-                .createdDate(diary.getCreatedDate())
-                .build();
-        return diaryDto;
-    }
-
     public DiaryDto createDiary(String name, String title, String content) {    // 다이어리 생성
         Diary diary = diaryRepository.save(Diary.builder()
                 .name(name)
                 .title(title)
                 .content(content)
-                .createdDate(Timestamp.valueOf(LocalDateTime.now()))
                 .build());
 
         DiaryDto diaryDto = DiaryDto.builder()
-                .diaryId(diary.getDiaryId())
+                .id(diary.getDiaryId())
                 .name(diary.getName())
                 .title(diary.getTitle())
                 .content(diary.getContent())
@@ -45,14 +32,10 @@ public class DiaryService {
                 .build();
         return diaryDto;
     }
-
-    public DiaryDto updateDiary(Long diaryId, String title, String content) {   // 다이어리 수정
+    public DiaryDto readDiary(Long diaryId) {     // 다이어리 조회
         Diary diary = diaryRepository.findById(diaryId).orElseThrow(() -> new RuntimeException("다이어리가 존재하지 않습니다."));
-        diary.setTitle(title);
-        diary.setContent(content);
-        diaryRepository.save(diary);
         DiaryDto diaryDto = DiaryDto.builder()
-                .diaryId(diary.getDiaryId())
+                .id(diary.getDiaryId())
                 .name(diary.getName())
                 .title(diary.getTitle())
                 .content(diary.getContent())
@@ -61,16 +44,22 @@ public class DiaryService {
         return diaryDto;
     }
     @Transactional
-    public DiaryDto deleteDiary(Long diaryId) {  // 다이어리 삭제
+    public DiaryDto updateDiary(Long diaryId, String title, String content) {   // 다이어리 수정
         Diary diary = diaryRepository.findById(diaryId).orElseThrow(() -> new RuntimeException("다이어리가 존재하지 않습니다."));
-        diaryRepository.save(diary);
+        diary.update(title, content);
         DiaryDto diaryDto = DiaryDto.builder()
-                .diaryId(diary.getDiaryId())
+                .id(diary.getDiaryId())
                 .name(diary.getName())
                 .title(diary.getTitle())
                 .content(diary.getContent())
                 .createdDate(diary.getCreatedDate())
                 .build();
         return diaryDto;
+    }
+    @Transactional
+    public Boolean deleteDiary(Long diaryId) {  // 다이어리 삭제
+        Diary diary = diaryRepository.findById(diaryId).orElseThrow(() -> new RuntimeException("다이어리가 존재하지 않습니다."));
+        diary.delete();
+        return Boolean.TRUE;
     }
 }

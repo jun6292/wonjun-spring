@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 @Getter @Setter
 @RequiredArgsConstructor
 public class DiaryDto {
-    private Long diaryId;    // 다이어리를 식별하기 위한 id
+    private Long id;    // 다이어리를 식별하기 위한 id
     private String name;    // 다이어리 작성자
     private String title;   // 다이어리 제목
     private String content; // 다이어리 내용
@@ -18,8 +18,8 @@ public class DiaryDto {
 
     // 다이어리 id, 제목, 내용
     @Builder
-    public DiaryDto(Long diaryId, String name, String title, String content, Timestamp createdDate) {
-        this.diaryId = diaryId;
+    public DiaryDto(Long id, String name, String title, String content, Timestamp createdDate) {
+        this.id = id;
         this.name = name;
         this.title = title;
         this.content = content;
