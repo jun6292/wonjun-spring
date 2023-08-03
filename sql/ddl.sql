@@ -16,3 +16,4 @@ CREATE TABLE users (
     created_date TIMESTAMP,
     PRIMARY KEY (user_id)
 );
+

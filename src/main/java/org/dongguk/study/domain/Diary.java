@@ -14,13 +14,13 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "diary")
+@Table(name = "diaries")
 @DynamicUpdate
 public class Diary {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "diary_id")
-    private Long diaryId;
+    private Long id;
 
     @Column(name = "user_name", nullable = false)
     private String name;
@@ -45,6 +45,7 @@ public class Diary {
         this.isVisible = true;
         this.createdDate = Timestamp.valueOf(LocalDateTime.now());
     }
+
     public void update(String title, String content) {
         this.title = title;
         this.content = content;
