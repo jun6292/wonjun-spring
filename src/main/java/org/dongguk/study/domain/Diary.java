@@ -5,14 +5,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.dongguk.study.dto.DiaryDto;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor
 @Table(name = "diaries")
 @DynamicUpdate
@@ -22,7 +23,7 @@ public class Diary {
     @Column(name = "diary_id")
     private Long id;
 
-    @Column(name = "user_name", nullable = false)
+    @Column(name = "name")
     private String name;
 
     @Column(name = "title", nullable = false)
@@ -34,24 +35,35 @@ public class Diary {
     @Column(name = "created_date", nullable = false)
     private Timestamp createdDate;
 
-    @Column(name = "is_visible", nullable = false)
-    private boolean isVisible;
+    @Column(name = "visible", nullable = false)
+    private boolean visible;
+
+    @JoinColumn(name = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User user;
+
+    @OneToMany(mappedBy = "diary")
+    private List<DiaryTagMap> diaryTagMaps;
 
     @Builder
-    public Diary(String name, String title, String content) {
+    public Diary(String name, String title, String content, User user, List<DiaryTagMap> diaryTagMaps) {
         this.name = name;
         this.title = title;
         this.content = content;
-        this.isVisible = true;
         this.createdDate = Timestamp.valueOf(LocalDateTime.now());
+        this.visible = true;
+        this.user = user;
+        this.diaryTagMaps = diaryTagMaps;
     }
 
-    public void update(String title, String content) {
-        this.title = title;
-        this.content = content;
+    public void update(DiaryDto dto) {
+        if (dto.getTitle() != null)
+            this.title = title;
+        if (dto.getContent() != null)
+            this.content = content;
     }
+
     public void delete() {
-        this.isVisible = false;
+        this.visible = false;
     }
-
 }

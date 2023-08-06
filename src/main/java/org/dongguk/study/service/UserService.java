@@ -22,20 +22,23 @@ public class UserService {
                 .name(user.getName()).build();
     }
 
-    public UserDto updateUserProfile(Long userId, String name) {
+    @Transactional
+    public UserDto updateUserProfile(Long userId, UserDto dto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("유저가 없어요."));
 
-        user.setName(name);
+        user.patch(dto);
         return UserDto.builder()
                 .id(user.getId())
                 .name(user.getName()).build();
     }
 
     @Transactional
-    public Boolean deleteUserProfile(Long userId) {
+    public UserDto deleteUserProfile(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("유저가 없어요."));
 
         userRepository.delete(user);
-        return Boolean.TRUE;
+        return UserDto.builder()
+                .id(user.getId())
+                .name(user.getName()).build();
     }
 }

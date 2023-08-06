@@ -9,12 +9,14 @@ import org.dongguk.study.Repository.DiaryTagRepository;
 import org.dongguk.study.Repository.UserRepository;
 import org.dongguk.study.domain.Diary;
 import org.dongguk.study.domain.DiaryTag;
+import org.dongguk.study.domain.DiaryTagMap;
 import org.dongguk.study.domain.User;
 import org.dongguk.study.dto.DiaryDto;
-import org.dongguk.study.dto.UserDto;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -25,66 +27,143 @@ public class DiaryService {
     private final DiaryTagMapRepository diaryTagMapRepository;
     private final UserRepository userRepository;
 
-    // 아직 구현중
-    public DiaryDto createDiary(DiaryDto diaryDto, UserDto userDto) {    // 다이어리 생성
-        User user = userRepository.findById(userDto.getId()).orElseThrow(() -> new RuntimeException("유저가 존재하지 않습니다."));
-        List<String> DiaryTags = diaryDto.getTags();
-        Diary diary = diaryRepository.save(Diary.builder()
-                .name(user.getName())
+    @Transactional
+    public DiaryDto createDiary(DiaryDto diaryDto, Long userId) {    // 다이어리 생성
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("유저가 존재하지 않습니다."));
+        Diary diary = Diary.builder()   // 다이어리 엔티티 생성
                 .title(diaryDto.getTitle())
                 .content(diaryDto.getContent())
-                .build());
-        DiaryTag diaryTag = diaryTagRepository.save(DiaryTags.builder()
-                .name(diaryDto.getTags()))
-                .build());
+                .name(user.getName())
+                .user(user)
+                .build();
+        List<String> tags = diaryDto.getTags(); // 입력 받은 태그들 가져옴.
 
-        DiaryDto diaryDto = DiaryDto.builder()
+        List<DiaryTag> tagList = new ArrayList<>();    // 다이어리 태그 엔티티 생성
+        for (String name : tags) {
+            DiaryTag tagName = diaryTagRepository.findByDiaryTagName(name).orElse(null);
+            if (tagName == null) {
+                DiaryTag diaryTag = tagName.builder()
+                        .name(name)
+                        .build();
+                diaryTagRepository.save(diaryTag);
+                tagList.add(diaryTag);
+            }
+            else {
+                tagList.add(tagName);
+            }
+        }
+
+        List<DiaryTagMap> diaryTagMap = new ArrayList<>();
+        for (DiaryTag diaryTag : tagList) {
+            DiaryTagMap map = DiaryTagMap.builder()
+                    .diary(diary)
+                    .diaryTag(diaryTag)
+                    .build();
+            diaryTagMap.add(map);
+            diary.getDiaryTagMaps().add(map);
+            diaryTag.getDiaryTagMaps().add(map);
+        }
+        diaryRepository.save(diary);    // 태그가 붙은 다이어리 DB에 저장
+        DiaryDto saved = DiaryDto.builder() // DTO로 변환 후 반환
                 .id(diary.getId())
+                .userId(diary.getUser().getId())
                 .name(diary.getName())
                 .title(diary.getTitle())
                 .content(diary.getContent())
                 .createdDate(diary.getCreatedDate())
-                .tags(diaryTag.getName())
+                .visible(diary.isVisible())
+                .tags(diaryTagMapRepository.findTagsByDiaryId(diary.getId()))
                 .build();
-        return diaryDto;
+        return saved;
     }
+
     public DiaryDto readDiary(Long diaryId) {     // 다이어리 조회
         Diary diary = diaryRepository.findByIdAndIsVisible(diaryId, true).orElseThrow(() -> new RuntimeException("다이어리가 존재하지 않습니다."));
         List<String> diaryTags = diaryTagMapRepository.findTagsByDiaryId(diaryId);
-        DiaryDto diaryDto = DiaryDto.builder()
+        DiaryDto show = DiaryDto.builder()
                 .id(diary.getId())
+                .userId(diary.getUser().getId())
                 .name(diary.getName())
                 .title(diary.getTitle())
                 .content(diary.getContent())
                 .createdDate(diary.getCreatedDate())
+                .visible(diary.isVisible())
                 .tags(diaryTags)
                 .build();
-        return diaryDto;
+        return show;
     }
 
-    public List<Diary> readDiaryList() {     // 다이어리 목록 조회
+    public List<DiaryDto> readDiaryList() {     // 전체 다이어리 조회
         List<Diary> diaryList = diaryRepository.findAll();
-        return diaryList;
+        List<DiaryDto> diaryDtos = new ArrayList<>();
+        for (Diary diary : diaryList) {
+            DiaryDto diaryDto = DiaryDto.builder()
+                    .id(diary.getId())
+                    .userId(diary.getUser().getId())
+                    .title(diary.getTitle())
+                    .name(diary.getName())
+                    .createdDate(diary.getCreatedDate())
+                    .visible(diary.isVisible())
+                    .build();
+            diaryDtos.add(diaryDto);
+        }
+        return diaryDtos;
     }
 
-    // 아직 구현중
     @Transactional
-    public DiaryDto updateDiary(Long diaryId, String title, String content) {   // 다이어리 수정
+    public DiaryDto updateDiary(Long diaryId, DiaryDto dto) {   // 다이어리 수정
         Diary diary = diaryRepository.findById(diaryId).orElseThrow(() -> new RuntimeException("다이어리가 존재하지 않습니다."));
-        diary.update(title, content);
-        DiaryDto diaryDto = DiaryDto.builder()
+        diary.update(dto);
+        List<String> tags = dto.getTags(); // 입력 받은 태그들 가져옴.
+
+        // 매핑 싹다 삭제하고 태그 다시 달기
+        List<DiaryTagMap> diaryTagMaps = diaryTagMapRepository.findAllByDiary(diary);
+        diaryTagMapRepository.deleteAll(diaryTagMaps);
+
+        List<DiaryTag> tagList = new ArrayList<>();    // 다이어리 태그 엔티티 생성
+        for (String name : tags) {
+            DiaryTag tagName = diaryTagRepository.findByDiaryTagName(name).orElse(null);
+            if (tagName == null) {
+                DiaryTag diaryTag = tagName.builder()
+                        .name(name)
+                        .build();
+                diaryTagRepository.save(diaryTag);
+                tagList.add(diaryTag);
+            }
+            else {
+                tagList.add(tagName);
+            }
+        }
+
+        List<DiaryTagMap> diaryTagMap = new ArrayList<>();
+        for (DiaryTag diaryTag : tagList) {
+            DiaryTagMap map = DiaryTagMap.builder()
+                    .diary(diary)
+                    .diaryTag(diaryTag)
+                    .build();
+            diaryTagMap.add(map);
+            diary.getDiaryTagMaps().add(map);
+            diaryTag.getDiaryTagMaps().add(map);
+        }
+
+        diaryRepository.save(diary);    // 태그가 붙은 다이어리 DB에 저장
+        DiaryDto updated = DiaryDto.builder()
                 .id(diary.getId())
+                .userId(diary.getUser().getId())
                 .name(diary.getName())
                 .title(diary.getTitle())
                 .content(diary.getContent())
                 .createdDate(diary.getCreatedDate())
+                .visible(diary.isVisible())
+                .tags(diaryTagMapRepository.findTagsByDiaryId(diary.getId()))
                 .build();
-        return diaryDto;
+        return updated;
     }
+
     @Transactional
     public Boolean deleteDiary(Long diaryId) {  // 다이어리 삭제
         Diary diary = diaryRepository.findById(diaryId).orElseThrow(() -> new RuntimeException("다이어리가 존재하지 않습니다."));
-        diary.delete();
+        diary.delete();    // DB에서는 삭제 안함.
         return Boolean.TRUE;
     }
 }

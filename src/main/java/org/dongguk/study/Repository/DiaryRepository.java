@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,7 +13,7 @@ import java.util.Optional;
 public interface DiaryRepository extends JpaRepository<Diary, Long> {
     Optional<Diary> findByIdAndIsVisible(Long id, Boolean isVisible);
 
-    @Query(value = "select d from Diary d where d.diaryId =: diaryId and d.isVisible = true")
+    @Query(value = "select d from Diary d where d.id =: id and d.isVisible = true", nativeQuery = true)
     Optional<Diary> getByIdAndIsVisible(@Param("id") Long id);
 
     @Override

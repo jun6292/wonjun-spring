@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dongguk.study.dto.UserDto;
 import org.dongguk.study.service.UserService;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -15,18 +12,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
     private final UserService userService;
 
-    @GetMapping("/user")
-    public UserDto readUserProfile() {
-        return userService.readUserProfile(1L);
+    @GetMapping("/user/{id}")
+    public UserDto read(@PathVariable Long id) {
+        return userService.readUserProfile(id);
     }
 
-    @PutMapping("/user")
-    public UserDto updateUserProfile() {
-        return userService.updateUserProfile(1L, "수정");
+    @PutMapping("/user/{id}")
+    public UserDto update(@PathVariable Long id, @RequestBody UserDto dto) {
+        return userService.updateUserProfile(id, dto);
     }
 
-//    @DeleteMapping("/user")
-//    public UserDto deleteUserProfile() {
-//        return userService.deleteUserProfile(1L);
-//    }
+    @DeleteMapping("/user/{id}")
+    public UserDto delete(@PathVariable Long id) {
+        return userService.deleteUserProfile(id);
+    }
 }
